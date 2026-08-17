@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>PERCHA · Panel</title>
+<meta name="theme-color" content="#1C1A17">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧥</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --hueso:#F4F1EA; --tinta:#1C1A17; --tinta-suave:#6B655C;
+    --linea:#E2DDD2; --terracota:#B84A1E; --blanco:#FFFDF9; --verde:#2E5E45;
+    --rojo:#A3341F;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{background:var(--hueso);color:var(--tinta);font-family:'Inter',system-ui,sans-serif;padding-bottom:120px}
+  .serif{font-family:'Fraunces',Georgia,serif}
+  button{font-family:inherit;cursor:pointer}
+  input,select,textarea{font-family:inherit;font-size:16px;color:var(--tinta)}
+
+  header{padding:22px 20px 0}
+  .marca{font-family:'Fraunces',serif;font-weight:700;font-size:26px;letter-spacing:.06em}
+  .marca span{color:var(--terracota)}
+  .marca small{font-family:'Inter';font-size:11px;font-weight:600;letter-spacing:.2em;color:var(--tinta-suave);margin-left:8px}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:16px 20px}
+  .stat{background:var(--blanco);border:1px solid var(--linea);border-radius:12px;padding:10px 8px;text-align:center}
+  .stat .n{font-family:'Fraunces',serif;font-weight:700;font-size:18px}
+  .stat .l{font-size:10px;color:var(--tinta-suave);letter-spacing:.04em;margin-top:2px}
+
+  .tabs{display:flex;gap:6px;padding:0 20px;border-bottom:1px solid var(--linea)}
+  .tab{flex:1;background:none;border:none;padding:12px 4px;font-size:14px;font-weight:600;color:var(--tinta-suave);border-bottom:2px solid transparent}
+  .tab.on{color:var(--tinta);border-bottom-color:var(--terracota)}
+  .pane{display:none;padding:18px 20px}
+  .pane.on{display:block}
+
+  /* ── formulario ── */
+  .foto-zona{border:2px dashed var(--linea);background:var(--blanco);border-radius:14px;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--tinta-suave);font-size:14px;overflow:hidden;position:relative}
+  .foto-zona img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .foto-zona .icono{font-size:34px}
+  .campo{margin-top:14px}
+  .campo label{display:block;font-size:12px;font-weight:600;color:var(--tinta-suave);letter-spacing:.04em;margin-bottom:6px}
+  .campo input,.campo select,.campo textarea{width:100%;border:1px solid var(--linea);background:var(--blanco);border-radius:10px;padding:12px 14px;outline:none;appearance:none;-webkit-appearance:none}
+  .campo input:focus,.campo select:focus{border-color:var(--tinta)}
+  .dos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .btn{width:100%;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:700;letter-spacing:.02em}
+  .btn-primario{background:var(--tinta);color:var(--hueso)}
+  .btn-borde{background:transparent;border:1px solid var(--linea);color:var(--tinta)}
+  .btn-verde{background:var(--verde);color:#fff}
+  .btn:active{transform:scale(.98)}
+  .btn[disabled]{opacity:.5;pointer-events:none}
+  .nota-form{font-size:12px;color:var(--tinta-suave);margin-top:10px;text-align:center}
+
+  /* ── lista ── */
+  .busca-admin{width:100%;border:1px solid var(--linea);background:var(--blanco);border-radius:10px;padding:11px 14px;outline:none;margin-bottom:10px}
+  .filtro-status{display:flex;gap:6px;overflow-x:auto;margin-bottom:14px;scrollbar-width:none}
+  .filtro-status::-webkit-scrollbar{display:none}
+  .fchip{border:1px solid var(--linea);background:transparent;color:var(--tinta-suave);border-radius:999px;padding:6px 12px;font-size:12px;flex-shrink:0}
+  .fchip.on{background:var(--tinta);color:var(--hueso);border-color:var(--tinta)}
+  .item{background:var(--blanco);border:1px solid var(--linea);border-radius:12px;padding:10px;display:flex;gap:12px;margin-bottom:10px}
+  .item .mini{width:64px;height:80px;border-radius:8px;object-fit:cover;background:#EAE6DC;flex-shrink:0}
+  .item .cuerpo{flex:1;min-width:0}
+  .item .t1{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item .t2{font-size:12px;color:var(--tinta-suave);margin-top:2px}
+  .item .t3{font-size:13px;margin-top:4px}
+  .item .t3 b{font-family:'Fraunces',serif}
+  .pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;padding:3px 8px;border-radius:6px;margin-top:6px}
+  .pill.disponible{background:#E4EDE7;color:var(--verde)}
+  .pill.apartada{background:#F3E3C9;color:#8A6210}
+  .pill.vendida{background:#EBE7DF;color:var(--tinta-suave)}
+  .pill.sinpub{background:#F7DFD5;color:var(--terracota);margin-left:4px}
+  .acciones{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .mini-btn{border:1px solid var(--linea);background:transparent;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--tinta)}
+  .mini-btn.peligro{color:var(--rojo);border-color:#E8CFC7}
+
+  /* ── barra publicar ── */
+  .barra-pub{position:fixed;left:0;right:0;bottom:0;background:var(--tinta);color:var(--hueso);padding:14px 20px calc(14px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:14px;z-index:50}
+  .barra-pub .txt{flex:1;font-size:13px}
+  .barra-pub .txt b{display:block;font-size:14px}
+  .barra-pub button{background:var(--terracota);color:#fff;border:none;border-radius:10px;padding:12px 18px;font-weight:700;font-size:14px}
+
+  /* ── ajustes ── */
+  .caja{background:var(--blanco);border:1px solid var(--linea);border-radius:14px;padding:16px;margin-bottom:14px}
+  .caja h3{font-size:14px;margin-bottom:4px}
+  .caja p{font-size:12px;color:var(--tinta-suave);line-height:1.5;margin-bottom:10px}
+  .caja .btn{margin-top:8px}
+  .ok-txt{font-size:12px;margin-top:8px}
+
+  /* ── etiqueta modal ── */
+  .modal{position:fixed;inset:0;background:rgba(28,26,23,.7);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .modal.on{display:flex}
+  .modal-caja{background:var(--hueso);border-radius:16px;padding:20px;width:100%;max-width:360px;max-height:90vh;overflow:auto}
+  .etiqueta{background:#fff;border:1.5px solid var(--tinta);border-radius:8px;padding:18px;text-align:center}
+  .etiqueta .e-marca{font-family:'Fraunces',serif;font-weight:700;font-size:15px;letter-spacing:.14em}
+  .etiqueta .e-num{font-family:'Fraunces',serif;font-weight:700;font-size:44px;margin:6px 0 2px}
+  .etiqueta .e-tit{font-size:13px;font-weight:600}
+  .etiqueta .e-det{font-size:11px;color:#555;margin-top:2px}
+  .etiqueta .e-precios{margin-top:10px;display:flex;justify-content:center;align-items:baseline;gap:10px}
+  .etiqueta .e-precio{font-family:'Fraunces',serif;font-weight:700;font-size:26px}
+  .etiqueta .e-orig{font-size:13px;color:#777;text-decoration:line-through}
+  .modal-caja .btn{margin-top:12px}
+  @media print{
+    body>*{display:none !important}
+    .modal.on{display:block !important;position:static;background:none;padding:0}
+    .modal-caja{box-shadow:none;max-width:none;padding:0;background:none}
+    .modal-caja .btn,.modal-caja h4{display:none !important}
+    .etiqueta{width:62mm;margin:0}
+  }
+
+  .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--tinta);color:var(--hueso);padding:12px 20px;border-radius:10px;font-size:13px;z-index:200;display:none;max-width:90vw;text-align:center}
+  .toast.on{display:block}
+  .prog{font-size:12px;color:var(--tinta-suave);margin-top:8px;display:none}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="marca">PERCHA<span>.</span><small>PANEL</small></div>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="n" id="stDisp">0</div><div class="l">Disponibles</div></div>
+  <div class="stat"><div class="n" id="stValor">$0</div><div class="l">Valor</div></div>
+  <div class="stat"><div class="n" id="stVend">0</div><div class="l">Vendidas</div></div>
+  <div class="stat"><div class="n" id="stIngreso">$0</div><div class="l">Ingreso</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab on" data-pane="paneLista">Prendas</button>
+  <button class="tab" data-pane="paneNueva" id="tabNueva">+ Nueva</button>
+  <button class="tab" data-pane="paneAjustes">Ajustes</button>
+</div>
+
+<!-- ══ LISTA ══ -->
+<div class="pane on" id="paneLista">
+  <input class="busca-admin" id="buscaAdmin" type="search" placeholder="Buscar por #, título o marca…">
+  <div class="filtro-status" id="filtroStatus">
+    <button class="fchip on" data-f="">Todas</button>
+    <button class="fchip" data-f="disponible">Disponibles</button>
+    <button class="fchip" data-f="apartada">Apartadas</button>
+    <button class="fchip" data-f="vendida">Vendidas</button>
+    <button class="fchip" data-f="sinpub">Sin publicar</button>
+  </div>
+  <div id="lista"></div>
+  <div id="listaVacia" style="text-align:center;padding:50px 20px;color:var(--tinta-suave)" hidden>
+    <div class="serif" style="font-size:22px;color:var(--tinta);margin-bottom:8px">Aún no hay prendas</div>
+    Toca <b>+ Nueva</b> para dar de alta la primera.
+  </div>
+</div>
+
+<!-- ══ NUEVA / EDITAR ══ -->
+<div class="pane" id="paneNueva">
+  <input type="file" id="inputFoto" accept="image/*" hidden>
+  <div class="foto-zona" id="fotoZona">
+    <div class="icono">📷</div>
+    <div>Toca para tomar la foto</div>
+  </div>
+  <div class="campo"><label>Prenda *</label><input id="fTitulo" placeholder="Ej. Blusa de seda, Jeans rectos…"></div>
+  <div class="dos">
+    <div class="campo"><label>Marca</label><input id="fMarca" list="marcasList" placeholder="Zara, Nike…"><datalist id="marcasList"></datalist></div>
+    <div class="campo"><label>Talla</label><input id="fTalla" list="tallasList" placeholder="M, 32, 7…"><datalist id="tallasList">
+      <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option>
+      <option>28</option><option>30</option><option>32</option><option>34</option><option>36</option>
+    </datalist></div>
+  </div>
+  <div class="dos">
+    <div class="campo"><label>Sección</label><select id="fSeccion">
+      <option>Mujer</option><option>Hombre</option><option>Niños</option><option>Unisex</option>
+    </select></div>
+    <div class="campo"><label>Categoría</label><select id="fCategoria">
+      <option>Blusas</option><option>Playeras</option><option>Camisas</option><option>Pantalones</option>
+      <option>Jeans</option><option>Shorts</option><option>Faldas</option><option>Vestidos</option>
+      <option>Sudaderas</option><option>Chamarras</option><option>Suéteres</option><option>Deportiva</option>
+      <option>Zapatos</option><option>Accesorios</option><option>Otra</option>
+    </select></div>
+  </div>
+  <div class="campo"><label>Estado de uso</label><select id="fEstado">
+    <option>Nuevo con etiqueta</option><option>Nuevo</option><option selected>Seminuevo</option>
+    <option>Buen estado</option><option>Con detalle</option>
+  </select></div>
+  <div class="dos">
+    <div class="campo"><label>Precio original</label><input id="fPrecioOriginal" type="number" inputmode="numeric" placeholder="$"></div>
+    <div class="campo"><label>Precio oferta *</label><input id="fPrecio" type="number" inputmode="numeric" placeholder="$"></div>
+  </div>
+  <div class="campo"><button class="btn btn-primario" id="btnGuardar">Guardar y generar etiqueta</button></div>
+  <button class="btn btn-borde" id="btnCancelarEdicion" hidden>Cancelar edición</button>
+  <div class="nota-form">Al guardar se asigna el número de etiqueta para la bolsa.</div>
+</div>
+
+<!-- ══ AJUSTES ══ -->
+<div class="pane" id="paneAjustes">
+  <div class="caja">
+    <h3>WhatsApp de pedidos</h3>
+    <p>El botón «Lo quiero» del catálogo abre un chat a este número. Con lada de país, ej. <b>52443…</b> (10 dígitos después del 52).</p>
+    <input class="busca-admin" id="ajWhatsapp" type="tel" placeholder="52 443 000 0000" style="margin-bottom:0">
+    <button class="btn btn-borde" id="btnGuardarWa">Guardar número</button>
+  </div>
+  <div class="caja">
+    <h3>Publicar catálogo</h3>
+    <p>Sube las prendas y fotos a la página pública. Necesita el código de conexión (se pega una sola vez).</p>
+    <input class="busca-admin" id="ajToken" type="password" placeholder="Código de conexión (token)" style="margin-bottom:0">
+    <button class="btn btn-borde" id="btnProbarToken">Probar conexión</button>
+    <button class="btn btn-verde" id="btnPublicar">Publicar catálogo</button>
+    <div class="prog" id="progPub"></div>
+  </div>
+  <div class="caja">
+    <h3>Respaldo</h3>
+    <p>Descarga todo el inventario (con fotos) en un archivo. Guárdalo de vez en cuando; sirve para recuperar todo si cambias de teléfono.</p>
+    <button class="btn btn-borde" id="btnRespaldo">Descargar respaldo</button>
+    <input type="file" id="inputRestaurar" accept=".json" hidden>
+    <button class="btn btn-borde" id="btnRestaurar">Restaurar respaldo</button>
+    <button class="btn btn-borde" id="btnImportar">Importar del catálogo publicado</button>
+  </div>
+  <div class="caja">
+    <h3>Enlaces</h3>
+    <p id="linkCatalogo">Catálogo público: <b>studioamr.github.io/percha</b></p>
+    <p>Guarda este panel en tu pantalla de inicio: compartir → «Agregar a pantalla de inicio».</p>
+  </div>
+</div>
+
+<!-- barra publicar -->
+<div class="barra-pub" id="barraPub" hidden>
+  <div class="txt"><b id="pubN"></b>Publica para que se vean en el catálogo</div>
+  <button id="btnPublicarBarra">Publicar</button>
+</div>
+
+<!-- modal etiqueta -->
+<div class="modal" id="modalEtiqueta">
+  <div class="modal-caja">
+    <h4 class="serif" style="margin-bottom:12px;font-size:18px">Etiqueta para la bolsa</h4>
+    <div class="etiqueta" id="etiquetaBox"></div>
+    <button class="btn btn-primario" onclick="window.print()">Imprimir etiqueta</button>
+    <button class="btn btn-borde" onclick="cerrarModal()">Listo</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════ CONFIG ═══════════ */
+const GH={owner:'studioamr',repo:'percha',branch:'main'};
+const $=id=>document.getElementById(id);
+const mx=new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0});
+let DB, PRENDAS=[], META={}, fotoBlobActual=null, editandoId=null;
+let FA={q:'',f:''};
+
+/* ═══════════ INDEXEDDB ═══════════ */
+function abrirDB(){
+  return new Promise((res,rej)=>{
+    const q=indexedDB.open('percha',1);
+    q.onupgradeneeded=()=>{
+      const d=q.result;
+      d.createObjectStore('prendas',{keyPath:'id'});
+      d.createObjectStore('meta');
+    };
+    q.onsuccess=()=>res(q.result);
+    q.onerror=()=>rej(q.error);
+  });
+}
+function tx(store,mode,fn){
+  return new Promise((res,rej)=>{
+    const t=DB.transaction(store,mode);
+    const r=fn(t.objectStore(store));
+    t.oncomplete=()=>res(r&&'result' in r?r.result:undefined);
+    t.onerror=()=>rej(t.error);
+  });
+}
+const dbAll=()=>tx('prendas','readonly',s=>s.getAll());
+const dbPut=p=>tx('prendas','readwrite',s=>s.put(p));
+const dbDel=id=>tx('prendas','readwrite',s=>s.delete(id));
+const metaGet=k=>tx('meta','readonly',s=>s.get(k));
+const metaSet=(k,v)=>tx('meta','readwrite',s=>s.put(v,k));
+
+/* ═══════════ INICIO ═══════════ */
+async function init(){
+  DB=await abrirDB();
+  PRENDAS=await dbAll();
+  META.contador=(await metaGet('contador'))||0;
+  META.whatsapp=(await metaGet('whatsapp'))||'';
+  META.sinPublicarCatalogo=(await metaGet('sinPublicarCatalogo'))||false;
+  $('ajWhatsapp').value=META.whatsapp;
+  $('ajToken').value=localStorage.getItem('percha_token')||'';
+  refrescar();
+}
+
+function refrescar(){
+  renderStats(); renderLista(); renderBarra(); renderDatalists();
+}
+
+function renderStats(){
+  const disp=PRENDAS.filter(p=>p.status!=='vendida');
+  const vend=PRENDAS.filter(p=>p.status==='vendida');
+  $('stDisp').textContent=disp.length;
+  $('stValor').textContent=mx.format(disp.reduce((a,p)=>a+(p.precio||0),0));
+  $('stVend').textContent=vend.length;
+  $('stIngreso').textContent=mx.format(vend.reduce((a,p)=>a+(p.precio||0),0));
+}
+
+function renderDatalists(){
+  const marcas=[...new Set(PRENDAS.map(p=>p.marca).filter(Boolean))].sort();
+  $('marcasList').innerHTML=marcas.map(m=>`<option>${esc(m)}</option>`).join('');
+}
+
+function renderLista(){
+  let lista=[...PRENDAS].sort((a,b)=>b.creada-a.creada);
+  if(FA.f==='sinpub') lista=lista.filter(p=>!p.published&&p.status!=='vendida');
+  else if(FA.f) lista=lista.filter(p=>p.status===FA.f);
+  if(FA.q) lista=lista.filter(p=>('#'+p.etiqueta+' '+p.titulo+' '+(p.marca||'')).toLowerCase().includes(FA.q));
+  const cont=$('lista');
+  cont.innerHTML='';
+  $('listaVacia').hidden=PRENDAS.length>0;
+  lista.forEach(p=>{
+    const el=document.createElement('div');
+    el.className='item';
+    const url=p.foto?URL.createObjectURL(p.foto):'';
+    el.innerHTML=`
+      <img class="mini" src="${url}" alt="">
+      <div class="cuerpo">
+        <div class="t1">#${p.etiqueta} · ${esc(p.titulo)}</div>
+        <div class="t2">${esc([p.marca,p.talla?'T '+p.talla:null,p.estado].filter(Boolean).join(' · '))}</div>
+        <div class="t3"><b>${mx.format(p.precio)}</b>${p.precioOriginal>p.precio?' <s style="color:var(--tinta-suave);font-size:12px">'+mx.format(p.precioOriginal)+'</s>':''}</div>
+        <span class="pill ${p.status}">${p.status.toUpperCase()}</span>${!p.published&&p.status!=='vendida'?'<span class="pill sinpub">SIN PUBLICAR</span>':''}
+        <div class="acciones">
+          <button class="mini-btn" data-a="etiqueta">Etiqueta</button>
+          ${p.status==='disponible'?'<button class="mini-btn" data-a="apartar">Apartar</button>':''}
+          ${p.status==='apartada'?'<button class="mini-btn" data-a="liberar">Liberar</button>':''}
+          ${p.status!=='vendida'?'<button class="mini-btn" data-a="vender">Vendida ✓</button>':'<button class="mini-btn" data-a="devolver">Regresar</button>'}
+          <button class="mini-btn" data-a="editar">Editar</button>
+          <button class="mini-btn peligro" data-a="borrar">Borrar</button>
+        </div>
+      </div>`;
+    el.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>accion(b.dataset.a,p));
+    cont.appendChild(el);
+  });
+}
+
+async function accion(a,p){
+  if(a==='etiqueta') return mostrarEtiqueta(p);
+  if(a==='editar') return cargarEdicion(p);
+  if(a==='borrar'){
+    if(!confirm(`¿Borrar #${p.etiqueta} · ${p.titulo}? No se puede deshacer.`)) return;
+    await dbDel(p.id);
+    PRENDAS=PRENDAS.filter(x=>x.id!==p.id);
+    await marcarCambio(); refrescar(); toast('Prenda borrada'); return;
+  }
+  if(a==='apartar') p.status='apartada';
+  if(a==='liberar') p.status='disponible';
+  if(a==='vender'){ p.status='vendida'; p.vendidaTs=Date.now(); }
+  if(a==='devolver'){ p.status='disponible'; p.vendidaTs=null; }
+  await dbPut(p); await marcarCambio(); refrescar();
+  toast(a==='vender'?`Vendida #${p.etiqueta} · ${mx.format(p.precio)} 🎉`:'Listo');
+}
+
+async function marcarCambio(){
+  META.sinPublicarCatalogo=true;
+  await metaSet('sinPublicarCatalogo',true);
+}
+
+/* ═══════════ TABS ═══════════ */
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.pane').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on'); $(t.dataset.pane).classList.add('on');
+});
+$('buscaAdmin').addEventListener('input',e=>{FA.q=e.target.value.toLowerCase();renderLista();});
+document.querySelectorAll('.fchip').forEach(c=>c.onclick=()=>{
+  document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('on'));
+  c.classList.add('on'); FA.f=c.dataset.f; renderLista();
+});
+
+/* ═══════════ FOTO ═══════════ */
+$('fotoZona').onclick=()=>$('inputFoto').click();
+$('inputFoto').addEventListener('change',async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  try{
+    fotoBlobActual=await comprimir(f);
+    $('fotoZona').innerHTML=`<img src="${URL.createObjectURL(fotoBlobActual)}">`;
+  }catch(err){
+    alert('No pude leer esa foto. Prueba tomarla directo con la cámara.');
+  }
+  e.target.value='';
+});
+async function comprimir(file){
+  let img;
+  try{ img=await createImageBitmap(file); }
+  catch(e){
+    img=await new Promise((res,rej)=>{
+      const i=new Image();
+      i.onload=()=>res(i); i.onerror=rej;
+      i.src=URL.createObjectURL(file);
+    });
+  }
+  const w=img.width||img.naturalWidth, h=img.height||img.naturalHeight;
+  const escala=Math.min(1,1000/Math.max(w,h));
+  const c=document.createElement('canvas');
+  c.width=Math.round(w*escala); c.height=Math.round(h*escala);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+  return new Promise(res=>c.toBlob(b=>res(b),'image/jpeg',.82));
+}
+
+/* ═══════════ GUARDAR / EDITAR ═══════════ */
+$('btnGuardar').onclick=async()=>{
+  const titulo=$('fTitulo').value.trim();
+  const precio=parseFloat($('fPrecio').value);
+  if(!titulo) return alert('Ponle nombre a la prenda.');
+  if(!precio) return alert('Falta el precio de oferta.');
+  if(!editandoId&&!fotoBlobActual) return alert('Falta la foto.');
+
+  let p;
+  if(editandoId){
+    p=PRENDAS.find(x=>x.id===editandoId);
+    if(fotoBlobActual){ p.foto=fotoBlobActual; p.published=false; }
+  }else{
+    META.contador++;
+    await metaSet('contador',META.contador);
+    p={id:Date.now(),etiqueta:String(META.contador).padStart(4,'0'),status:'disponible',creada:Date.now(),published:false,foto:fotoBlobActual};
+    PRENDAS.push(p);
+  }
+  Object.assign(p,{
+    titulo,
+    marca:$('fMarca').value.trim(),
+    talla:$('fTalla').value.trim(),
+    seccion:$('fSeccion').value,
+    categoria:$('fCategoria').value,
+    estado:$('fEstado').value,
+    precioOriginal:parseFloat($('fPrecioOriginal').value)||0,
+    precio
+  });
+  await dbPut(p); await marcarCambio();
+  const nueva=!editandoId;
+  limpiarForm(); refrescar();
+  if(nueva) mostrarEtiqueta(p);
+  else{ toast('Cambios guardados'); irALista(); }
+};
+
+function cargarEdicion(p){
+  editandoId=p.id; fotoBlobActual=null;
+  $('tabNueva').textContent='Editar #'+p.etiqueta;
+  $('fTitulo').value=p.titulo; $('fMarca').value=p.marca||''; $('fTalla').value=p.talla||'';
+  $('fSeccion').value=p.seccion||'Mujer'; $('fCategoria').value=p.categoria||'Otra';
+  $('fEstado').value=p.estado||'Seminuevo';
+  $('fPrecioOriginal').value=p.precioOriginal||''; $('fPrecio').value=p.precio;
+  $('fotoZona').innerHTML=`<img src="${URL.createObjectURL(p.foto)}">`;
+  $('btnGuardar').textContent='Guardar cambios';
+  $('btnCancelarEdicion').hidden=false;
+  document.querySelector('[data-pane="paneNueva"]').click();
+}
+$('btnCancelarEdicion').onclick=()=>{ limpiarForm(); irALista(); };
+
+function limpiarForm(){
+  editandoId=null; fotoBlobActual=null;
+  $('tabNueva').textContent='+ Nueva';
+  ['fTitulo','fMarca','fTalla','fPrecioOriginal','fPrecio'].forEach(id=>$(id).value='');
+  $('fotoZona').innerHTML='<div class="icono">📷</div><div>Toca para tomar la foto</div>';
+  $('btnGuardar').textContent='Guardar y generar etiqueta';
+  $('btnCancelarEdicion').hidden=true;
+}
+function irALista(){ document.querySelector('[data-pane="paneLista"]').click(); }
+
+/* ═══════════ ETIQUETA ═══════════ */
+function mostrarEtiqueta(p){
+  $('etiquetaBox').innerHTML=`
+    <div class="e-marca">PERCHA.</div>
+    <div class="e-num">#${p.etiqueta}</div>
+    <div class="e-tit">${esc(p.titulo)}</div>
+    <div class="e-det">${esc([p.marca,p.talla?'Talla '+p.talla:null,p.estado].filter(Boolean).join(' · '))}</div>
+    <div class="e-precios">
+      <span class="e-precio">${mx.format(p.precio)}</span>
+      ${p.precioOriginal>p.precio?`<span class="e-orig">${mx.format(p.precioOriginal)}</span>`:''}
+    </div>`;
+  $('modalEtiqueta').classList.add('on');
+}
+function cerrarModal(){ $('modalEtiqueta').classList.remove('on'); }
+
+/* ═══════════ BARRA PUBLICAR ═══════════ */
+function pendientes(){ return PRENDAS.filter(p=>!p.published&&p.status!=='vendida').length; }
+function hayCambios(){ return pendientes()>0||META.sinPublicarCatalogo; }
+function renderBarra(){
+  const n=pendientes();
+  $('barraPub').hidden=!hayCambios();
+  $('pubN').textContent=n>0?`${n} prenda${n===1?'':'s'} sin publicar`:'Hay cambios sin publicar';
+}
+$('btnPublicarBarra').onclick=publicar;
+$('btnPublicar').onclick=publicar;
+
+/* ═══════════ AJUSTES ═══════════ */
+$('btnGuardarWa').onclick=async()=>{
+  const v=$('ajWhatsapp').value.replace(/\D/g,'');
+  if(v&&v.length<11) return alert('El número se ve corto. Debe llevar lada de país, ej. 524430000000');
+  META.whatsapp=v; await metaSet('whatsapp',v); await marcarCambio(); renderBarra();
+  toast(v?'Número guardado. Publica para que el catálogo lo use.':'Número borrado');
+};
+$('ajToken').addEventListener('change',()=>localStorage.setItem('percha_token',$('ajToken').value.trim()));
+$('btnProbarToken').onclick=async()=>{
+  try{ await gh(`/repos/${GH.owner}/${GH.repo}`); toast('✓ Conexión lista'); }
+  catch(e){ alert('No conectó: '+e.message); }
+};
+
+/* ═══════════ PUBLICAR (GitHub API) ═══════════ */
+async function gh(path,opts={}){
+  const token=localStorage.getItem('percha_token')||'';
+  if(!token) throw new Error('Falta el código de conexión (Ajustes).');
+  const r=await fetch('https://api.github.com'+path,{...opts,headers:{
+    'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json',...(opts.headers||{})}});
+  if(!r.ok) throw new Error(r.status+' '+(await r.text()).slice(0,140));
+  return r.json();
+}
+function blobB64(blob){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader();
+    fr.onload=()=>res(fr.result.split(',')[1]);
+    fr.onerror=rej; fr.readAsDataURL(blob);
+  });
+}
+let publicando=false;
+async function publicar(){
+  if(publicando) return;
+  publicando=true;
+  const prog=$('progPub'); prog.style.display='block';
+  const paso=t=>{prog.textContent=t; $('pubN').textContent=t;};
+  try{
+    paso('Preparando…');
+    const ref=await gh(`/repos/${GH.owner}/${GH.repo}/git/ref/heads/${GH.branch}`);
+    const baseCommit=await gh(`/repos/${GH.owner}/${GH.repo}/git/commits/${ref.object.sha}`);
+
+    const nuevas=PRENDAS.filter(p=>!p.published&&p.status!=='vendida'&&p.foto);
+    const arbol=[];
+    for(let i=0;i<nuevas.length;i++){
+      paso(`Subiendo foto ${i+1} de ${nuevas.length}…`);
+      const b64=await blobB64(nuevas[i].foto);
+      const blob=await gh(`/repos/${GH.owner}/${GH.repo}/git/blobs`,{method:'POST',body:JSON.stringify({content:b64,encoding:'base64'})});
+      arbol.push({path:`fotos/${nuevas[i].etiqueta}.jpg`,mode:'100644',type:'blob',sha:blob.sha});
+    }
+
+    paso('Armando catálogo…');
+    const catalogo={
+      tienda:'PERCHA',
+      subtitulo:'Ropa seminueva y nueva · Morelia',
+      whatsapp:META.whatsapp||'',
+      actualizado:new Date().toISOString(),
+      prendas:PRENDAS.filter(p=>p.status!=='vendida').map(p=>({
+        id:p.id,etiqueta:p.etiqueta,titulo:p.titulo,marca:p.marca,seccion:p.seccion,
+        categoria:p.categoria,talla:p.talla,estado:p.estado,
+        precioOriginal:p.precioOriginal,precio:p.precio,
+        foto:`fotos/${p.etiqueta}.jpg`,status:p.status,creada:p.creada
+      }))
+    };
+    arbol.push({path:'catalogo.json',mode:'100644',type:'blob',
+      content:JSON.stringify(catalogo,null,1)});
+
+    const tree=await gh(`/repos/${GH.owner}/${GH.repo}/git/trees`,{method:'POST',
+      body:JSON.stringify({base_tree:baseCommit.tree.sha,tree:arbol})});
+    const commit=await gh(`/repos/${GH.owner}/${GH.repo}/git/commits`,{method:'POST',
+      body:JSON.stringify({message:`Catálogo: ${catalogo.prendas.length} prendas`,tree:tree.sha,parents:[ref.object.sha]})});
+    await gh(`/repos/${GH.owner}/${GH.repo}/git/refs/heads/${GH.branch}`,{method:'PATCH',
+      body:JSON.stringify({sha:commit.sha})});
+
+    for(const p of nuevas){ p.published=true; await dbPut(p); }
+    META.sinPublicarCatalogo=false; await metaSet('sinPublicarCatalogo',false);
+    prog.style.display='none';
+    refrescar();
+    toast(`✓ Publicado: ${catalogo.prendas.length} prendas en el catálogo (tarda ~1 min en verse)`);
+  }catch(e){
+    prog.style.display='none';
+    alert('No se pudo publicar: '+e.message);
+    renderBarra();
+  }finally{ publicando=false; }
+}
+
+/* ═══════════ RESPALDO / RESTAURAR / IMPORTAR ═══════════ */
+$('btnRespaldo').onclick=async()=>{
+  toast('Armando respaldo…');
+  const out=[];
+  for(const p of PRENDAS) out.push({...p,foto:p.foto?await blobB64(p.foto):null});
+  const data={version:1,contador:META.contador,whatsapp:META.whatsapp,prendas:out};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
+  a.download='percha-respaldo.json';
+  a.click();
+};
+$('btnRestaurar').onclick=()=>{
+  if(confirm('Esto REEMPLAZA el inventario actual con el del respaldo. ¿Continuar?')) $('inputRestaurar').click();
+};
+$('inputRestaurar').addEventListener('change',async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  try{
+    const data=JSON.parse(await f.text());
+    for(const p of PRENDAS) await dbDel(p.id);
+    PRENDAS=[];
+    for(const p of data.prendas){
+      if(p.foto) p.foto=b64ToBlob(p.foto);
+      await dbPut(p); PRENDAS.push(p);
+    }
+    META.contador=data.contador||PRENDAS.length;
+    await metaSet('contador',META.contador);
+    if(data.whatsapp){ META.whatsapp=data.whatsapp; await metaSet('whatsapp',data.whatsapp); $('ajWhatsapp').value=data.whatsapp; }
+    refrescar(); toast('✓ Respaldo restaurado: '+PRENDAS.length+' prendas');
+  }catch(err){ alert('Ese archivo no es un respaldo válido.'); }
+  e.target.value='';
+});
+$('btnImportar').onclick=async()=>{
+  if(PRENDAS.length&&!confirm('Ya hay prendas aquí. Importar agrega las del catálogo publicado que no tengas. ¿Continuar?')) return;
+  try{
+    toast('Importando…');
+    const r=await fetch('catalogo.json?v='+Date.now());
+    const cat=await r.json();
+    let n=0;
+    for(const c of cat.prendas||[]){
+      if(PRENDAS.some(p=>p.etiqueta===c.etiqueta)) continue;
+      const fr=await fetch(c.foto+'?v='+Date.now());
+      const foto=await fr.blob();
+      const p={...c,foto,published:true};
+      await dbPut(p); PRENDAS.push(p); n++;
+      META.contador=Math.max(META.contador,parseInt(c.etiqueta,10)||0);
+    }
+    await metaSet('contador',META.contador);
+    if(cat.whatsapp&&!META.whatsapp){ META.whatsapp=cat.whatsapp; await metaSet('whatsapp',cat.whatsapp); $('ajWhatsapp').value=cat.whatsapp; }
+    refrescar(); toast(`✓ Importadas ${n} prendas`);
+  }catch(e){ alert('No se pudo importar: '+e.message); }
+};
+function b64ToBlob(b64){
+  const bin=atob(b64), arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  return new Blob([arr],{type:'image/jpeg'});
+}
+
+/* ═══════════ UTILS ═══════════ */
+function esc(s){ return String(s??'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+let toastTimer;
+function toast(msg){
+  const t=$('toast'); t.textContent=msg; t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('on'),3500);
+}
+
+init();
+</script>
+</body>
+</html>
