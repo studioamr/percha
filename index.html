@@ -20,11 +20,35 @@
   body{background:var(--hueso);color:var(--tinta);font-family:'Inter',system-ui,sans-serif;min-height:100vh}
   .serif{font-family:'Fraunces',Georgia,serif}
 
-  header{padding:28px 20px 18px;border-bottom:1px solid var(--linea)}
-  .marca{font-family:'Fraunces',serif;font-weight:700;font-size:34px;letter-spacing:.06em}
+  .topbar{display:flex;justify-content:space-between;align-items:baseline;padding:20px;border-bottom:1px solid var(--linea)}
+  .marca{font-family:'Fraunces',serif;font-weight:700;font-size:22px;letter-spacing:.06em}
   .marca span{color:var(--terracota)}
-  .sub{color:var(--tinta-suave);font-size:13px;margin-top:4px;letter-spacing:.02em}
-  .meta-linea{color:var(--tinta-suave);font-size:12px;margin-top:10px}
+  .topbar .lugar{font-size:12px;color:var(--tinta-suave);letter-spacing:.12em}
+
+  .hero{max-width:1200px;margin:0 auto;padding:56px 20px 44px;display:grid;gap:28px}
+  @media(min-width:800px){.hero{grid-template-columns:1fr auto;align-items:center;padding:80px 20px 60px}}
+  .hero h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(34px,6.5vw,62px);line-height:1.06;letter-spacing:-.01em;max-width:14ch}
+  .hero h1 em{font-style:normal;color:var(--terracota)}
+  .hero .baja{color:var(--tinta-suave);font-size:15px;line-height:1.6;max-width:44ch;margin-top:16px}
+  .hero .ctas{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
+  .cta{display:inline-block;text-decoration:none;font-weight:600;font-size:14px;padding:13px 22px;border-radius:10px}
+  .cta.lleno{background:var(--tinta);color:var(--hueso)}
+  .cta.borde{border:1px solid var(--linea);color:var(--tinta);background:var(--blanco)}
+  .cta:active{transform:scale(.98)}
+  .cta[hidden]{display:none}
+  .gancho{width:150px;justify-self:center;opacity:.9}
+  @media(min-width:800px){.gancho{width:220px}}
+  .gancho svg{width:100%;height:auto;display:block}
+
+  .puntos{max-width:1200px;margin:0 auto;padding:0 20px 8px;display:grid;gap:0}
+  @media(min-width:800px){.puntos{grid-template-columns:repeat(3,1fr);gap:24px}}
+  .punto{border-top:1px solid var(--linea);padding:16px 0}
+  .punto b{display:block;font-size:13px;letter-spacing:.02em}
+  .punto span{font-size:12px;color:var(--tinta-suave);line-height:1.5;display:block;margin-top:3px}
+
+  .cat-head{max-width:1200px;margin:0 auto;padding:34px 20px 0}
+  .cat-head h2{font-family:'Fraunces',serif;font-weight:600;font-size:24px}
+  .meta-linea{color:var(--tinta-suave);font-size:12px;margin-top:4px}
 
   .filtros{position:sticky;top:0;background:var(--hueso);z-index:10;border-bottom:1px solid var(--linea);padding:12px 20px}
   .fila-busca{display:flex;gap:8px}
@@ -70,11 +94,39 @@
 </head>
 <body>
 
-<header>
+<div class="topbar">
   <div class="marca">PERCHA<span>.</span></div>
-  <div class="sub" id="subtitulo">Ropa seminueva y nueva</div>
+  <div class="lugar">MORELIA</div>
+</div>
+
+<section class="hero">
+  <div>
+    <h1>Ropa buena, <em>dos veces</em> querida.</h1>
+    <p class="baja">Seminueva y nueva, elegida pieza por pieza. Cada prenda llega embolsada y etiquetada, con su marca, talla y estado de uso claros. La ves, la apartas por WhatsApp y es tuya.</p>
+    <div class="ctas">
+      <a class="cta lleno" href="#catalogo">Ver el catálogo</a>
+      <a class="cta borde" id="ctaWa" href="#" target="_blank" rel="noopener" hidden>Escríbenos</a>
+    </div>
+  </div>
+  <div class="gancho" aria-hidden="true">
+    <svg viewBox="0 0 220 160" fill="none" stroke="#1C1A17" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M110 14c-10 0-17 7-17 15 0 7 5 11 11 14 4 2 6 4 6 8v6"/>
+      <path d="M110 57 22 116c-5 3-3 11 4 11h168c7 0 9-8 4-11L110 57z"/>
+      <circle cx="110" cy="14" r="4" stroke="#B84A1E"/>
+    </svg>
+  </div>
+</section>
+
+<div class="puntos">
+  <div class="punto"><b>Embolsada y etiquetada</b><span>Cada pieza en su bolsa individual, con número de etiqueta.</span></div>
+  <div class="punto"><b>Sin sorpresas</b><span>Marca, talla y estado de uso a la vista en cada prenda.</span></div>
+  <div class="punto"><b>Precio honesto</b><span>Ves el precio original y el de oferta, lado a lado.</span></div>
+</div>
+
+<div class="cat-head" id="catalogo">
+  <h2>Catálogo</h2>
   <div class="meta-linea" id="metaLinea"></div>
-</header>
+</div>
 
 <div class="filtros" id="filtros" hidden>
   <div class="fila-busca">
@@ -117,9 +169,13 @@ async function cargar(){
     const r=await fetch('catalogo.json?v='+Date.now());
     DATA=await r.json();
   }catch(e){ DATA={prendas:[]}; }
-  if(DATA.subtitulo) $('subtitulo').textContent=DATA.subtitulo;
+  const num=(DATA.whatsapp||'').replace(/\D/g,'');
+  if(num){ const wa=$('ctaWa'); wa.hidden=false; wa.href='https://wa.me/'+num; }
   const disp=(DATA.prendas||[]).filter(p=>p.status!=='vendida');
   if(!disp.length){ $('vacio').hidden=false; $('cuenta').hidden=true; return; }
+  let act='';
+  if(DATA.actualizado) act=' · actualizado el '+new Date(DATA.actualizado).toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+  $('metaLinea').textContent=disp.length+' prenda'+(disp.length===1?'':'s')+' disponible'+(disp.length===1?'':'s')+act;
   $('filtros').hidden=false;
   poblarFiltros(disp);
   render();

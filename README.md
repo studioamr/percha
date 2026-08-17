@@ -16,11 +16,14 @@ Tienda de ropa seminueva y nueva de Coco. Catálogo público + panel de administ
 
 1. Abrir el panel y guardarlo en pantalla de inicio.
 2. **Ajustes → WhatsApp de pedidos:** su número con lada 52 (ej. `524430000000`).
-3. **Ajustes → código de conexión:** pegar un token de GitHub *fine-grained* creado por André:
-   - github.com → Settings → Developer settings → Fine-grained tokens
-   - Resource owner: `studioamr`, solo el repo `percha`
-   - Permisos: **Contents → Read and write**. Nada más.
-   - «Probar conexión» debe dar ✓.
+3. **Código de conexión (token):** André lo genera y se lo manda como *link mágico*:
+   - https://github.com/settings/personal-access-tokens/new
+   - Token name: `percha-coco` · Expiration: 1 año (custom)
+   - Resource owner: **studioamr** · Only select repositories → **percha**
+   - Repository permissions → **Contents: Read and write**. Nada más.
+   - Generar, copiar el token y mandarle a Coco el link:
+     `https://studioamr.github.io/percha/admin.html#token=EL_TOKEN`
+   - Al abrirlo, el panel guarda el token solo y limpia la URL. «Probar conexión» debe dar ✓.
 4. Dar de alta una prenda de prueba y **Publicar**.
 
 ## Notas técnicas

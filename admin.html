@@ -276,6 +276,11 @@ const metaSet=(k,v)=>tx('meta','readwrite',s=>s.put(v,k));
 
 /* ═══════════ INICIO ═══════════ */
 async function init(){
+  const m=location.hash.match(/token=([^&\s]+)/);
+  if(m){
+    localStorage.setItem('percha_token',decodeURIComponent(m[1]));
+    history.replaceState(null,'',location.pathname);
+  }
   DB=await abrirDB();
   PRENDAS=await dbAll();
   META.contador=(await metaGet('contador'))||0;
@@ -284,6 +289,7 @@ async function init(){
   $('ajWhatsapp').value=META.whatsapp;
   $('ajToken').value=localStorage.getItem('percha_token')||'';
   refrescar();
+  if(m) toast('✓ Código de conexión guardado en este teléfono');
 }
 
 function refrescar(){
