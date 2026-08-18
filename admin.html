@@ -285,6 +285,12 @@ async function init(){
   PRENDAS=await dbAll();
   META.contador=(await metaGet('contador'))||0;
   META.whatsapp=(await metaGet('whatsapp'))||'';
+  if(!META.whatsapp){
+    try{
+      const cat=await (await fetch('catalogo.json?v='+Date.now())).json();
+      if(cat.whatsapp){ META.whatsapp=cat.whatsapp; await metaSet('whatsapp',cat.whatsapp); }
+    }catch(e){}
+  }
   META.sinPublicarCatalogo=(await metaGet('sinPublicarCatalogo'))||false;
   $('ajWhatsapp').value=META.whatsapp;
   $('ajToken').value=localStorage.getItem('percha_token')||'';
