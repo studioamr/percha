@@ -2,6 +2,22 @@
  "tienda": "PERCHA",
  "subtitulo": "Ropa seminueva y nueva · Morelia",
  "whatsapp": "524431391122",
- "actualizado": null,
- "prendas": []
+ "actualizado": "2026-08-20T18:39:07.644Z",
+ "prendas": [
+  {
+   "id": 1787251135894,
+   "etiqueta": "0001",
+   "titulo": "Short mezclilla",
+   "marca": "Gap",
+   "seccion": "Mujer",
+   "categoria": "Shorts",
+   "talla": "S",
+   "estado": "Seminuevo",
+   "precioOriginal": 699,
+   "precio": 190,
+   "foto": "fotos/0001.jpg",
+   "status": "disponible",
+   "creada": 1787251135894
+  }
+ ]
 }
