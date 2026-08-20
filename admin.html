@@ -285,12 +285,28 @@ async function init(){
   PRENDAS=await dbAll();
   META.contador=(await metaGet('contador'))||0;
   META.whatsapp=(await metaGet('whatsapp'))||'';
-  if(!META.whatsapp){
-    try{
-      const cat=await (await fetch('catalogo.json?v='+Date.now())).json();
-      if(cat.whatsapp){ META.whatsapp=cat.whatsapp; await metaSet('whatsapp',cat.whatsapp); }
-    }catch(e){}
+  // ── Auto-recuperación: si este navegador está vacío pero el catálogo publicado
+  //    tiene prendas (p. ej. el navegador de WhatsApp borra los datos), se
+  //    reconstruye TODO desde el catálogo antes de dejar tocar nada. ──
+  const catPub=await leerCatalogoPublicado();
+  if(catPub){
+    if(!META.whatsapp&&catPub.whatsapp){ META.whatsapp=catPub.whatsapp; await metaSet('whatsapp',catPub.whatsapp); }
+    if(!PRENDAS.length&&(catPub.prendas||[]).length){
+      toast('Recuperando tus prendas del catálogo…');
+      for(const c of catPub.prendas){
+        try{
+          const fr=await fetch(c.foto+'?v='+Date.now());
+          if(!fr.ok) continue;
+          const p={...c,foto:await fr.blob(),published:true};
+          await dbPut(p); PRENDAS.push(p);
+        }catch(e){}
+      }
+      toast('✓ '+PRENDAS.length+' prendas recuperadas del catálogo');
+    }
   }
+  // el contador jamás va por debajo de la etiqueta más alta (evita repetir #0001)
+  const maxEt=PRENDAS.reduce((m,p)=>Math.max(m,parseInt(p.etiqueta,10)||0),0);
+  if(META.contador<maxEt){ META.contador=maxEt; await metaSet('contador',META.contador); }
   META.sinPublicarCatalogo=(await metaGet('sinPublicarCatalogo'))||false;
   $('ajWhatsapp').value=META.whatsapp;
   $('ajToken').value=localStorage.getItem('percha_token')||'';
@@ -512,6 +528,17 @@ $('btnProbarToken').onclick=async()=>{
 };
 
 /* ═══════════ PUBLICAR (GitHub API) ═══════════ */
+async function leerCatalogoPublicado(){
+  try{
+    const r=await fetch(`https://raw.githubusercontent.com/${GH.owner}/${GH.repo}/${GH.branch}/catalogo.json?v=`+Date.now(),{cache:'no-store'});
+    if(r.ok) return await r.json();
+  }catch(e){}
+  try{
+    const r=await fetch('catalogo.json?v='+Date.now(),{cache:'no-store'});
+    if(r.ok) return await r.json();
+  }catch(e){}
+  return null;
+}
 async function gh(path,opts={}){
   const token=localStorage.getItem('percha_token')||'';
   if(!token) throw new Error('Falta el código de conexión (Ajustes).');
@@ -535,6 +562,13 @@ async function publicar(){
   const paso=t=>{prog.textContent=t; $('pubN').textContent=t;};
   try{
     paso('Preparando…');
+    // candado: nunca publicar un panel vacío encima de un catálogo con prendas
+    if(!PRENDAS.filter(p=>p.status!=='vendida').length){
+      const pub=await leerCatalogoPublicado();
+      if(pub&&(pub.prendas||[]).length){
+        throw new Error('El catálogo publicado tiene '+pub.prendas.length+' prendas y este teléfono está vacío. Recarga la página para recuperarlas — no publiques hasta que aparezcan.');
+      }
+    }
     const ref=await gh(`/repos/${GH.owner}/${GH.repo}/git/ref/heads/${GH.branch}`);
     const baseCommit=await gh(`/repos/${GH.owner}/${GH.repo}/git/commits/${ref.object.sha}`);
 
